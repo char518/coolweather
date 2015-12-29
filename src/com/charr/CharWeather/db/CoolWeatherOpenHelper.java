@@ -12,6 +12,7 @@ public class CoolWeatherOpenHelper extends SQLiteOpenHelper{
     private static final String CREATE_CITY_CODE = "create table Citycode ("
             +"id integer primary key autoincrement,"
             +"city_code text,"
+            +"city_china text"
             +"city_name text,"
             +"province_name text)";
 
