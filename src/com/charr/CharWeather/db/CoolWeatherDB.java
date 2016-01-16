@@ -30,7 +30,7 @@ public class CoolWeatherDB {
         return coolWeatherDB;
     }
 
-    private void saveCityInfo(CityInfo cityInfo) {
+    public void saveCityInfo(CityInfo cityInfo) {
         if (cityInfo != null) {
             ContentValues values = new ContentValues();
             values.put("city_code", cityInfo.getCity_code());
@@ -41,9 +41,24 @@ public class CoolWeatherDB {
         }
     }
 
-    private List<CityInfo> loadCityInfo(String cityName) {
+    public List<CityInfo> loadCityInfo(String cityName) {
         ArrayList<CityInfo> list = new ArrayList<CityInfo>();
         Cursor cursor = db.query("Citycode", null, "city_name = ?", new String[]{cityName}, null, null, null);
+        if(cursor.moveToNext()){
+            CityInfo cityInfo = new CityInfo();
+            cityInfo.setId(cursor.getInt(cursor.getColumnIndex("id")));
+            cityInfo.setCity_code(cursor.getString(cursor.getColumnIndex("city_code")));
+            cityInfo.setCity_china(cursor.getString(cursor.getColumnIndex("city_china")));
+            cityInfo.setCity_name(cursor.getString(cursor.getColumnIndex("city_name")));
+            cityInfo.setProvince_name(cursor.getString(cursor.getColumnIndex("province_name")));
+            list.add(cityInfo);
+        }
+        return list;
+    }
+
+    public List<CityInfo> loadCityInfo() {
+        ArrayList<CityInfo> list = new ArrayList<CityInfo>();
+        Cursor cursor = db.query("Citycode", null,null,null, null, null, null);
         if(cursor.moveToNext()){
             CityInfo cityInfo = new CityInfo();
             cityInfo.setId(cursor.getInt(cursor.getColumnIndex("id")));
