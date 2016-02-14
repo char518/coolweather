@@ -12,7 +12,7 @@ public class HttpUtil {
 //
 //    public static void main(String[] args){
 //        HttpUtil hu = new HttpUtil();
-//        HttpUtil.sendHttpRequest("http://mobile.weather.com.cn/js/citylist.xml");
+//        HttpUtil.sendHttpRequest("http://www.weather.com.cn/adat/cityinfo/101010100.html",null);
 //    }
 
     public static void sendHttpRequest(final String address,final HttpCallBackListener listener){

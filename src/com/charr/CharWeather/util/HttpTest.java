@@ -1,49 +1,96 @@
 package com.charr.CharWeather.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Administrator on 2015/12/29.
  */
 public class HttpTest {
-
+    public static final String appKey = "66c6e4ddf8eeb14a86ac08d5dbb3aabf";
+    public static final String CHARSET = "UTF-8";
     public static void main(String[] args){
-        String address = "http://mobile.weather.com.cn/js/citylist.xml";
-        String httpContent = getHttpContent(address);
-        System.out.println(httpContent);
+        String str = getHttpContent("上海");
+        System.out.println(str);
     }
 
-    public static String getHttpContent(final String address){
-        String htmlSource = null;
+    public static String getHttpContent(final String cityName) {
+        String result = null;
+        String url = "http://op.juhe.cn/onebox/weather/query";
+        HashMap<String, Object> params = new HashMap<String,Object>();
+        params.put("cityname",cityName);
+        params.put("key",appKey);
+        params.put("dtype","");
+        result = getContent(url,params,"GET");
+        return result;
+    }
+
+    private static String getContent(String url, HashMap<String, Object> params, String method) {
+        HttpURLConnection conn = null;
+        BufferedReader reader = null;
+        String rs = null;
+        StringBuilder sb = new StringBuilder();
+        if(method == null || method.equals("GET")){
+            url = url + "?" + urlencode(params);
+        }
         try {
-            URL url = new URL(address);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(8*1000);
-            InputStream inputStream = connection.getInputStream();
-            byte[] data = readInputStream(inputStream);
-            htmlSource = new String(data,"UTF-8");
-            return htmlSource;
-        } catch (IOException e) {
+            URL strUrl = new URL(url);
+            conn = (HttpURLConnection) strUrl.openConnection();
+            if(method==null || method.equals("GET")){
+                conn.setRequestMethod("GET");
+            }else {
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+            }
+            conn.setConnectTimeout(3*1000);
+            conn.setReadTimeout(3*1000);
+            conn.setUseCaches(false);
+            conn.setInstanceFollowRedirects(false);
+            conn.connect();
+            if(params != null && method.equals("POST")){
+                try(DataOutputStream out = new DataOutputStream(conn.getOutputStream())){
+                    out.writeBytes(urlencode(params));
+                }
+            }
+            InputStream inputStream = conn.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(inputStream,CHARSET));
+            String strRead = null;
+            while(null != (strRead=reader.readLine())){
+                sb.append(strRead);
+            }
+            rs = sb.toString();
+
+        } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if(reader != null){
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (conn != null){
+                conn.disconnect();
+            }
         }
-        return htmlSource;
+        return rs;
     }
 
-    private static byte[] readInputStream(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len = 0;
-        while((len = inputStream.read(buffer)) != -1){
-            outStream.write(buffer,0,len);
+    private static String urlencode(HashMap<String, Object> params) {
+        StringBuilder sb = new StringBuilder();
+        for(Map.Entry<String, Object> i : params.entrySet()){
+            try {
+                sb.append(i.getKey()).append("=").append(URLEncoder.encode(i.getValue()+"","UTF-8")).append("&");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
-        inputStream.close();
-        return outStream.toByteArray();
+        return sb.toString();
     }
+
 }
